@@ -1,0 +1,29 @@
+# Use an official OpenJDK runtime as a parent image
+FROM openjdk:11-jre-slim
+
+# Set environment variables
+ENV CATALINA_HOME /usr/local/tomcat
+ENV PATH $CATALINA_HOME/bin:$PATH
+
+# Set the version of Tomcat to install
+ENV TOMCAT_MAJOR 9
+ENV TOMCAT_VERSION 9.0.65
+
+# Create a directory for Tomcat
+RUN mkdir -p "$CATALINA_HOME"
+
+# Download and unpack Tomcat
+RUN apt-get update && apt-get install -y curl && \
+    curl -fsSL https://downloads.apache.org/tomcat/tomcat-$TOMCAT_MAJOR/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz | tar xzf - -C $CATALINA_HOME --strip-components=1 && \
+    rm -rf $CATALINA_HOME/webapps/examples $CATALINA_HOME/webapps/docs && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Copy over your local configurations or web apps (optional)
+# COPY ./your-local-config-files /usr/local/tomcat/conf/
+# COPY ./your-webapp.war $CATALINA_HOME/webapps/
+
+# Expose ports
+EXPOSE 8080
+
+# Start Tomcat
+CMD ["catalina.sh", "run"]
